@@ -20,7 +20,6 @@ Patch1:		popa3d-0.6.4.patch
 Patch3:		popa3d-maildir.patch
 Patch4:		popa3d-vname.patch
 Requires(pre):	rpm-helper
-BuildRoot:      %_tmppath/%name-buildroot
 Buildrequires:	pam-devel
 Requires:	xinetd
 
