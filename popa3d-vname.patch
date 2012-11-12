@@ -1,0 +1,91 @@
+--- params.h	2003-04-12 14:16:01.000000000 +0000
++++ params.h	2003-07-27 09:06:19.000000000 +0000
+@@ -66,6 +66,20 @@
+ #if POP_VIRTUAL
+ 
+ /*
++ * Name-based virtual domain support by Hallgrimur H. Gunnarsson <hhg@data.is>
++ */
++#define VIRTUAL_VNAME			0
++
++#if VIRTUAL_VNAME
++
++/*
++ * VNAME_MAP path is relative to VIRTUAL_HOME_PATH.
++ */
++#define VNAME_MAP			"vnamemap"
++
++#endif
++
++/*
+  * VIRTUAL_HOME_PATH is where the virtual domain root directories live.
+  */
+ #define VIRTUAL_HOME_PATH		"/vhome"
+--- virtual.c	2001-10-22 10:10:36.000000000 +0000
++++ virtual.c	2003-07-27 09:07:23.000000000 +0000
+@@ -38,6 +38,55 @@
+ 	return 0;
+ }
+ 
++#if VIRTUAL_VNAME
++
++static char *vname_lookup(char *user)
++{
++	FILE *fp;
++	char *pathname;
++	char *user_domain, *domain, *address;
++	static char buffer[255];
++
++	if (!(user_domain = strchr(user, '@')) || !*user_domain) return NULL;
++
++	*user_domain++ = 0;
++
++	pathname = malloc(strlen(VIRTUAL_HOME_PATH) + strlen(VNAME_MAP) + 2);
++
++	if (!pathname) return NULL;
++
++	sprintf(pathname, "%s/%s", VIRTUAL_HOME_PATH, VNAME_MAP);
++
++	if (!(fp = fopen(pathname, "r"))) {
++		free(pathname);
++		return NULL;
++	}
++
++	free(pathname);
++
++	while (!feof(fp)) {
++		if (!fgets(buffer, sizeof(buffer), fp)) break;
++
++		if (feof(fp) || ferror(fp)) break;
++
++		buffer[strlen(buffer) - 1] = '\0';
++
++		if (!(domain = strtok(buffer, ":")) || !*domain) break;
++		if (!(address = strtok(NULL, ":")) || !*address) break;
++
++		if (!strcmp(user_domain, domain)) {
++			fclose(fp);
++			return address;
++		}
++	}
++
++	fclose(fp);
++
++	return NULL;
++}
++
++#endif
++
+ static char *lookup(void)
+ {
+ 	struct sockaddr_in sin;
+@@ -85,6 +134,9 @@
+ 	virtual_domain = "UNKNOWN";
+ 	virtual_spool = NULL;
+ 
++#if VIRTUAL_VNAME
++	if (!(address = vname_lookup(user)))
++#endif
+ 	if (!(address = lookup())) return NULL;
+ 
+ /* Authenticate globally (if supported) if run on a non-socket */
