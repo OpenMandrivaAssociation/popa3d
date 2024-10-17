@@ -10,7 +10,7 @@ Version:        %version
 Release:        %mkrel 6
 License:        BSD
 Group:          Networking/Mail
-URL:            http://www.openwall.com/popa3d/
+URL:            https://www.openwall.com/popa3d/
 Source0:        %name-%version.tar.bz2
 Source1:	popa3d-xinet
 Source2:	popa3d-pam
