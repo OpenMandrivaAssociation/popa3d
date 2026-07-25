@@ -7,7 +7,7 @@
 Summary:        %summary
 Name:           %name
 Version:        %version
-Release:        %mkrel 6
+Release:        7
 License:        BSD
 Group:          Networking/Mail
 URL:            https://www.openwall.com/popa3d/
